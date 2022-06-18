@@ -6,8 +6,8 @@ export default function Home() {
 
   const { signIn } = useAuth()
 
-  const [ email, setEmail ] = useState('')
-  const [ password, setPassword ] = useState('')
+  const [ email, setEmail ] = useState('diego@rocketseat.team')
+  const [ password, setPassword ] = useState('123456')
 
   async function handleSubmit(event: FormEvent) {
     
