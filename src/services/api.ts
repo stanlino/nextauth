@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios'
-import { parseCookies, setCookie } from 'nookies'
+import Router from 'next/router'
+import { destroyCookie, parseCookies, setCookie } from 'nookies'
 
 let cookies = parseCookies()
 let isRefreshing = false
@@ -71,7 +72,11 @@ api.interceptors.response.use(response => {
       })
 
     } else {
-
+      destroyCookie(undefined, 'nextauth.token')
+      destroyCookie(undefined, 'nextauth.refreshToken')
+      Router.push('/')
     }
   }
+
+  return Promise.reject(error)
 })
