@@ -3,15 +3,11 @@ import { withSRRAuth } from "../utils/withSRRAuth"
 import { api } from "../services/apiClient";
 import { useEffect } from "react";
 import { setupApiClient } from "../services/api";
-import { useCan } from "../hooks/can";
+import { Can } from "../components/can";
 
 export default function Dashboard() {
 
   const { user } = useAuth()
-
-  const userCanSeeMetrics = useCan({
-    roles: ['administrator', 'editor']
-  })
 
   useEffect(() => {
     api.get('/me')
@@ -23,7 +19,9 @@ export default function Dashboard() {
       <h1>
         {user?.email}
       </h1>
-      {userCanSeeMetrics && <div>Métricas</div>}
+      <Can permissions={['metrics.aa']}>
+        <div>Métricas</div>
+      </Can>
     </>
   )
 }
