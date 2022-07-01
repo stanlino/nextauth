@@ -19,6 +19,7 @@ interface AuthContextData {
   signIn(credentials: SignInCredentials): Promise<void>
   isAuthenticated: boolean;
   user: User
+  signOut(): void
 }
 
 interface AuthProviderProps {
@@ -26,6 +27,8 @@ interface AuthProviderProps {
 }
 
 const AuthContext = createContext({} as AuthContextData)
+
+let authChannel: BroadcastChannel
 
 export function AuthProvider({ children }: AuthProviderProps) {
 
@@ -36,6 +39,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = !!user
 
   useEffect(() => {
+
+    authChannel = new BroadcastChannel('auth')
+
+    authChannel.onmessage = (message) => {
+      switch (message.data) {
+        case 'signOut':
+          router.push('/')
+          break
+        case 'signIn':
+          router.push('/dashboard')
+          break
+        default: 
+          break
+      }
+    }
+  },[])
+
+  function signOut() {
+    destroyCookie(undefined, 'nextauth.token')
+    destroyCookie(undefined, 'nextauth.refreshToken')
+
+    authChannel.postMessage('signOut')
+
+    router.push('/')
+  }
+
+  useEffect(() => {
     const { 'nextauth.token' : token } = parseCookies()
 
     if (token) {
@@ -44,10 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         setUser({ email, permissions, roles })
       }).catch(error => {
-        destroyCookie(undefined, 'nextauth.token')
-        destroyCookie(undefined, 'nextauth.refreshToken')
-
-        router.push('/')
+        signOut()
       })
     }
 
@@ -85,6 +112,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       api.defaults.headers['Authorization'] = `Bearer ${token}`
 
       router.push('dashboard')
+
+      authChannel.postMessage("signIn");
       
     } catch (err) {
       console.log(err)
@@ -95,7 +124,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     <AuthContext.Provider value={{
       isAuthenticated,
       signIn,
-      user
+      user,
+      signOut
     }}>
       {children}
     </AuthContext.Provider>

@@ -7,7 +7,7 @@ import { Can } from "../components/can";
 
 export default function Dashboard() {
 
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
 
   useEffect(() => {
     api.get('/me')
@@ -19,6 +19,9 @@ export default function Dashboard() {
       <h1>
         {user?.email}
       </h1>
+
+      <button onClick={signOut}>Sign out</button>
+
       <Can permissions={['metrics.aa']}>
         <div>Métricas</div>
       </Can>
